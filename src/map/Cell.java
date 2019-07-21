@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class Cell {
 	public int xCoor, yCoor;
-	static int dim = 50, target_x, target_y;
+	static int dim = 50;
 	public int type;
 	static double prob[][] = new double[dim][dim];
 	static int probType[][] = new int[dim][dim];
