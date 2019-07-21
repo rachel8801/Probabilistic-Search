@@ -14,6 +14,7 @@ public class Map{
 	static int dim = 50;
 	JPanel grid[][]= new JPanel[dim][dim];
 	static double prob[][] = new double[dim][dim];
+	public int type;
 	
 	
 	public Map() {
@@ -22,11 +23,11 @@ public class Map{
 		frame.setLayout(new GridLayout(50, 50));
 		
 		   for (int i = 0; i < dim; i++) {
-
 		        for (int j = 0; j < dim; j++) {
-		        	//prob[i][j] = 1/(dim*dim);
-			       //  System.out.println("initial prob is " + prob[i][j]);
-	
+		        	
+		        	prob[i][j] = 1/Math.pow(dim, 2);
+			        //System.out.println("initial prob is " + prob[i][j]);
+		        	int count=0;
 		        	Random random = new Random();
 
 		            grid[i][j] = new JPanel();
@@ -34,26 +35,36 @@ public class Map{
 		        	int r = random.nextInt(4);
 	          
 		            if (r == 0) {
+		            	while(count < (2500 * 0.2)) {
 			               grid[i][j].setBackground(Color.WHITE);
-			               prob[i][j] = 0.2;
-			              // System.out.println("1st prob is " + prob[i][j]);
+			               count++;
+		            	}
+			               type = r;
+		            	//System.out.println("1st prob is " + prob[i][j]+ "count is "+count);
 		            }
 
 		            else if(r ==1){
+		            	while(count < (2500*0.3)) {
 		            	grid[i][j].setBackground(Color.GREEN);
-		            	prob[i][j] = 0.2;
+		            	count++;
 		            	
+		            	}
+		            	type = r;
 		            }
 		            else if(r ==2){
+		            	while(count < (2500*0.3)) {
 		            	grid[i][j].setBackground(Color.YELLOW);
-		            	prob[i][j] = 0.3;
-		            	//System.out.println("2nd prob is " + prob[i][j]);
-		            	
+		            	count++;
+		            	}
+		            	type = r;
+		            	//System.out.println("2nd prob is " + prob[i][j]+ "count is "+count);
 		            }
 		            else if(r ==3){
+		            	while(count < (2500*0.3)) {
 		            	grid[i][j].setBackground(Color.BLACK);
-		            	prob[i][j] = 0.3;
-		            	
+		            	count++;
+		            	}
+		            	type = r;
 		            }
 
 		            frame.add(grid[i][j]);  
@@ -69,7 +80,15 @@ public class Map{
     
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    frame.setVisible(true);
+
 	}
+	    public void getTarget(int x, int y) {    	
+	    	x = target_x;
+	    	y = target_y;
+	    }
+	    public void getType(int tp) {
+	    	tp = type;
+	    }
 
 		public static void main(String[] args) {
 		    new Map();
