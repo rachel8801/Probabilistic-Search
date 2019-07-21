@@ -2,21 +2,27 @@ package map;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.Random;
 
 public class Cell {
-	private int xCoor, yCoor, dim;
+	public int xCoor, yCoor;
+	static int dim = 50, target_x, target_y;
+	public int type;
+	static double prob[][] = new double[dim][dim];
+	static int probType[][] = new int[dim][dim];
+	static int target;
+	
+	public Cell(int x, int y) {
+		this(x, y, 0, 0);
 
-	public Cell(int xCoor, int yCoor, int cellSize) {
-		super();
-		this.xCoor = xCoor;
-		this.yCoor = yCoor;
-		dim = cellSize;
+		
 	}
-    public void draw(Graphics g) {
-        g.setColor(Color.BLACK);
-        g.fillRect(xCoor * dim, yCoor * dim, dim, dim);
-    }
-
+	public Cell(int x, int y, int type, double Init_prob) {
+		this.xCoor = x;
+		this.yCoor = y;
+		
+	}
+	
 	public int getxCoor() {
 		return xCoor;
 	}
@@ -32,6 +38,14 @@ public class Cell {
 	public void setyCoor(int yCoor) {
 		this.yCoor = yCoor;
 	}
-	
+	public int getType(){
+		return type;
+		
+	}
+	public static void main(String[] args) {
+		
+		
+
+	}
 
 }
