@@ -1,9 +1,5 @@
 package map;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.util.Random;
-
 public class Cell {
 	public int xCoor, yCoor;
 	static int dim = 50;
