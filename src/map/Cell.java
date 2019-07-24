@@ -62,6 +62,11 @@ public class Cell {
 		
 	}
 	
+	public double getFalseNegP(){
+		return false_neg_p;
+		
+	}
+	
 	@Override
 	public String toString() {
 		if(target){

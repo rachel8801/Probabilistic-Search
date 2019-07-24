@@ -13,7 +13,6 @@ public class Map{
 	static int dim = 50;
 	static JPanel grid[][]= new JPanel[dim][dim];
 	public static Cell grid_cell[][]= new Cell[dim][dim];
-	static double prob[][] = new double[dim][dim];
 	public int type;
 	public static Target target;
 	
@@ -24,50 +23,11 @@ public class Map{
 		
 		   for (int i = 0; i < dim; i++) {
 		        for (int j = 0; j < dim; j++) {
-		        	
-		        	prob[i][j] = 1/Math.pow(dim, 2);
-		        	int count=0;
-		        	Random random = new Random();
 
 		            grid[i][j] = new JPanel();
-
-		        	int r = random.nextInt(4);
-		        	//flat
-		            if (r == 0) {
-		            	while(count < (2500 * 0.2)) {
-			               grid[i][j].setBackground(Color.WHITE);
-			               count++;
-		            	}
-			               type = r;
-		            }
-		            //forest
-		            else if(r ==1){
-		            	while(count < (2500*0.3)) {
-		            	grid[i][j].setBackground(Color.GREEN);
-		            	count++;
-		            	
-		            	}
-		            	type = r;
-		            }
-		            //hill
-		            else if(r ==2){
-		            	while(count < (2500*0.3)) {
-		            	grid[i][j].setBackground(Color.YELLOW);
-		            	count++;
-		            	}
-		            	type = r;
-		            	}
-		            //cave
-		            else if(r ==3){
-		            	while(count < (2500*0.2)) {
-		            	grid[i][j].setBackground(Color.BLACK);
-		            	count++;
-		            	}
-		            	type = r;
-		            }
-		            
+		            int type = this.assignType(i, j);
 		            //create new cell and puts it into the grid containing the cells
-		            Cell c = new Cell(j, i, r, false);
+		            Cell c = new Cell(j, i, type, false);
 		            grid_cell[i][j] = c;
 		            
 		            frame.add(grid[i][j]);  
@@ -117,6 +77,30 @@ public class Map{
         }
         grid[dest.getyCoor()][dest.getxCoor()].setBackground(Color.RED);
 		
+	}
+	
+	public int assignType(int i , int j) {
+		double r = Math.random()*1;
+		if(r <=0.2) {
+			//flat
+			 grid[i][j].setBackground(Color.WHITE);
+			 return 0;
+		}
+           //forest
+		else if(r > 0.2 && r <= 0.5){
+			grid[i][j].setBackground(Color.GREEN);
+			return 1;
+        }
+           //hill
+        else if(r > 0.5 && r <= 0.8){
+           	grid[i][j].setBackground(Color.YELLOW);
+           	return 2;
+        }
+        //cave
+        else{
+           	grid[i][j].setBackground(Color.BLACK);
+           	return 3;
+        }
 	}
 
 	public static void main(String[] args) {
