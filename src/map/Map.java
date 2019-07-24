@@ -11,37 +11,36 @@ public class Map{
 	JFrame frame;
 	static int target_x, target_y;
 	static int dim = 50;
-	JPanel grid[][]= new JPanel[dim][dim];
+	static JPanel grid[][]= new JPanel[dim][dim];
+	public static Cell grid_cell[][]= new Cell[dim][dim];
 	static double prob[][] = new double[dim][dim];
 	public int type;
-	
+	public static Target target;
 	
 	public Map() {
 		frame = new JFrame("Map");
 		frame.setSize(700, 700);
-		frame.setLayout(new GridLayout(50, 50));
+		frame.setLayout(new GridLayout(dim, dim));
 		
 		   for (int i = 0; i < dim; i++) {
 		        for (int j = 0; j < dim; j++) {
 		        	
 		        	prob[i][j] = 1/Math.pow(dim, 2);
-			        //System.out.println("initial prob is " + prob[i][j]);
 		        	int count=0;
 		        	Random random = new Random();
 
 		            grid[i][j] = new JPanel();
 
 		        	int r = random.nextInt(4);
-	          
+		        	//flat
 		            if (r == 0) {
 		            	while(count < (2500 * 0.2)) {
 			               grid[i][j].setBackground(Color.WHITE);
 			               count++;
 		            	}
 			               type = r;
-		            	//System.out.println("1st prob is " + prob[i][j]+ "count is "+count);
 		            }
-
+		            //forest
 		            else if(r ==1){
 		            	while(count < (2500*0.3)) {
 		            	grid[i][j].setBackground(Color.GREEN);
@@ -50,22 +49,27 @@ public class Map{
 		            	}
 		            	type = r;
 		            }
+		            //hill
 		            else if(r ==2){
 		            	while(count < (2500*0.3)) {
 		            	grid[i][j].setBackground(Color.YELLOW);
 		            	count++;
 		            	}
 		            	type = r;
-		            	//System.out.println("2nd prob is " + prob[i][j]+ "count is "+count);
-		            }
+		            	}
+		            //cave
 		            else if(r ==3){
-		            	while(count < (2500*0.3)) {
+		            	while(count < (2500*0.2)) {
 		            	grid[i][j].setBackground(Color.BLACK);
 		            	count++;
 		            	}
 		            	type = r;
 		            }
-
+		            
+		            //create new cell and puts it into the grid containing the cells
+		            Cell c = new Cell(j, i, r, false);
+		            grid_cell[i][j] = c;
+		            
 		            frame.add(grid[i][j]);  
 		        }
 		   }
@@ -74,25 +78,54 @@ public class Map{
 		        
 			 		target_x = random.nextInt(dim-1);
 			   		target_y = random.nextInt(dim-1);
-			   		grid[target_x][target_y].setBackground(Color.RED);
+			   		target = new Target(target_x, target_y);
+			   		grid[target_y][target_x].setBackground(Color.RED);
   
     
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    frame.setVisible(true);
 
-	}
-	    public void getTarget(int x, int y) {    	
-	    	x = target_x;
-	    	y = target_y;
-	    }
-	    public void getType(int tp) {
-	    	tp = type;
-	    }
-
-		public static void main(String[] args) {
-		    new Map();
+	}  
+	
+	//updating java window
+	public static void target_move(Cell src, Cell dest) {
+		try {
+		    Thread.sleep(50);
+		} catch (InterruptedException e) {
+		    // recommended because catching InterruptedException clears interrupt flag
+		    Thread.currentThread().interrupt();
+		    // you probably want to quit if the thread is interrupted
+		    return;
 		}
 		
-	
+		int r = src.type;
+		//flat
+        if (r == 0) {
+        	 grid[src.getyCoor()][src.getxCoor()].setBackground(Color.WHITE);
+        }
+        //forest
+        else if(r ==1){
+        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.GREEN);
+        }
+        //hill
+        else if(r ==2){
+        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.YELLOW);
+        }
+        //cave
+        else if(r ==3){
+        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.BLACK);
+        }
+        grid[dest.getyCoor()][dest.getxCoor()].setBackground(Color.RED);
+		
+	}
 
+	public static void main(String[] args) {
+		new Map();
+		
+		//tests for moving target
+		for(int i = 0; i < 50 ; i++) {
+			target.move();
+		}
+	}
+	
 }

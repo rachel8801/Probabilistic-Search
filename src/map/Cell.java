@@ -1,47 +1,72 @@
 package map;
 
 public class Cell {
-	public int xCoor, yCoor;
-	static int dim = 50;
+	private int xCoor, yCoor;
 	public int type;
-	static double prob[][] = new double[dim][dim];
-	static int probType[][] = new int[dim][dim];
-	static int target;
+	private double false_neg_p;
+	private boolean target;
 	
-	public Cell(int x, int y) {
-		this(x, y, 0, 0);
-
-		
-	}
-	public Cell(int x, int y, int type, double Init_prob) {
+	public Cell(int x, int y, int type, boolean target) {
 		this.xCoor = x;
 		this.yCoor = y;
+		this.target = target;
+		this.type = type;
 		
+		switch(type) {
+			//flat
+			case 0:
+				false_neg_p = 0.1;
+				break;
+			//forest	
+			case 1:
+				false_neg_p = 0.3;
+				break;
+			//hill
+			case 2:
+				false_neg_p = 0.7;
+				break;
+			//cave
+			case 3:
+				false_neg_p = 0.9;
+				break;
+			default:
+				
+		}
+		
+	}
+	
+	public void setTarget(boolean t){
+		target = t;
+	}
+	
+	public boolean attempt_search() {
+		double p = Math.random()*1;
+		if(p > false_neg_p) {
+			return target;
+		}
+		return false;
 	}
 	
 	public int getxCoor() {
 		return xCoor;
 	}
 
-	public void setxCoor(int xCoor) {
-		this.xCoor = xCoor;
-	}
 
 	public int getyCoor() {
 		return yCoor;
 	}
 
-	public void setyCoor(int yCoor) {
-		this.yCoor = yCoor;
-	}
+
 	public int getType(){
 		return type;
 		
 	}
-	public static void main(String[] args) {
-		
-		
-
+	
+	@Override
+	public String toString() {
+		if(target){
+			return "T ";
+		}
+		return type + " ";
 	}
-
 }
