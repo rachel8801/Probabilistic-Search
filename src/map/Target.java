@@ -17,6 +17,10 @@ public class Target {
 		
 	}
 	
+	public Cell getCurrentCell() {
+		return current_cell;
+	}
+	
 	public ArrayList<Integer> move() {
 		//get a list of random possible moves
 		//init array to store random possible moves
@@ -62,7 +66,7 @@ public class Target {
 		report.add(r_cell.type);
 		
 		//move the target and return the report
-		Map.target_move(current_cell, r_cell);
+		Map.object_move(Map.Object.TARGET, current_cell, r_cell);
 		current_cell.setTarget(false);
 		r_cell.setTarget(true);
 		current_cell = r_cell;

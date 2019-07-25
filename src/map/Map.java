@@ -10,11 +10,16 @@ import javax.swing.JPanel;
 public class Map{
 	JFrame frame;
 	static int target_x, target_y;
-	static int dim = 50;
+	static int dim = 25;
 	static JPanel grid[][]= new JPanel[dim][dim];
 	public static Cell grid_cell[][]= new Cell[dim][dim];
 	public int type;
 	public static Target target;
+	public static Agent agent;
+	
+	public enum Object{
+		TARGET, AGENT
+	}
 	
 	public Map() {
 		frame = new JFrame("Map");
@@ -39,6 +44,7 @@ public class Map{
 			 		target_x = random.nextInt(dim-1);
 			   		target_y = random.nextInt(dim-1);
 			   		target = new Target(target_x, target_y);
+			   		agent = new Agent();
 			   		grid[target_y][target_x].setBackground(Color.RED);
   
     
@@ -48,7 +54,7 @@ public class Map{
 	}  
 	
 	//updating java window
-	public static void target_move(Cell src, Cell dest) {
+	public static void object_move(Map.Object type, Cell src, Cell dest) {
 		try {
 		    Thread.sleep(50);
 		} catch (InterruptedException e) {
@@ -59,26 +65,36 @@ public class Map{
 		}
 		
 		int r = src.type;
-		//flat
-        if (r == 0) {
-        	 grid[src.getyCoor()][src.getxCoor()].setBackground(Color.WHITE);
-        }
-        //forest
-        else if(r ==1){
-        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.GREEN);
-        }
-        //hill
-        else if(r ==2){
-        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.YELLOW);
-        }
-        //cave
-        else if(r ==3){
-        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.BLACK);
-        }
-        grid[dest.getyCoor()][dest.getxCoor()].setBackground(Color.RED);
+		if((!target.getCurrentCell().equals(src) && type == Map.Object.AGENT) 
+				||(!agent.getCurrentCell().equals(src) && type == Map.Object.TARGET)) {
+			//flat
+	        if (r == 0) {
+	        	 grid[src.getyCoor()][src.getxCoor()].setBackground(Color.WHITE);
+	        }
+	        //forest
+	        else if(r ==1){
+	        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.GREEN);
+	        }
+	        //hill
+	        else if(r ==2){
+	        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.YELLOW);
+	        }
+	        //cave
+	        else if(r ==3){
+	        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.BLACK);
+	        }
+		}else if(type == Map.Object.AGENT && target.getCurrentCell().equals(src) ) {
+			grid[src.getyCoor()][src.getxCoor()].setBackground(Color.red);
+		}else if(type == Map.Object.TARGET && agent.getCurrentCell().equals(src)) {
+			grid[src.getyCoor()][src.getxCoor()].setBackground(Color.magenta);
+		}
+        
+        grid[dest.getyCoor()][dest.getxCoor()].setBackground(type == Map.Object.AGENT? Color.magenta: Color.red);
 		
 	}
 	
+	//assign type based on random prob generated and which section does it fall
+	//in the cumulative probability
 	public int assignType(int i , int j) {
 		double r = Math.random()*1;
 		if(r <=0.2) {
@@ -105,11 +121,14 @@ public class Map{
 
 	public static void main(String[] args) {
 		new Map();
+		Agent agent = new Agent();
+		agent.searchRule1();
 		
+		/*
 		//tests for moving target
 		for(int i = 0; i < 50 ; i++) {
 			target.move();
-		}
+		}*/
 	}
 	
 }
