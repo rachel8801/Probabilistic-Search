@@ -79,6 +79,12 @@ public class Agent {
 			current_cell = possible_moves.get(0);
 		}else {
 			//use belief system here
+			for(double[] arr : belief) {
+			for(double c : arr) {
+				//need to find an equation to use to calculate new value of c for each cell
+				
+			}
+		}
 		}
 		
 	}
