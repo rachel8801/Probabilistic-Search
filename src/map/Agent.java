@@ -79,10 +79,21 @@ public class Agent {
 			current_cell = possible_moves.get(0);
 		}else {
 			//use belief system here
+			//sum used to calculate normalization constant for belief state
+			double sum=0;
 			for(double[] arr : belief) {
 			for(double c : arr) {
-				//need to find an equation to use to calculate new value of c for each cell
-				
+				if(c==current_cell){
+					c=current_cell.type*c
+				} //else belief is only effected by normalization constant
+				sum=sum+c;
+			}
+		}
+			double norm=1/sum; //calculate normalization constant
+			for(double[] arr : belief) {
+			for(double c : arr) {
+				c=c*(1/norm) //normalize all belief states
+					
 			}
 		}
 		}
