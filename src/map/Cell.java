@@ -7,14 +7,13 @@ public class Cell implements Comparable<Cell>{
 	public int type;
 	private double false_neg_p;
 	private boolean target;
-	private boolean searched;
+	
 	
 	public Cell(int x, int y, int type, boolean target) {
 		this.xCoor = x;
 		this.yCoor = y;
 		this.target = target;
 		this.type = type;
-		searched = false;
 		switch(type) {
 			//flat
 			case 0:
@@ -44,7 +43,6 @@ public class Cell implements Comparable<Cell>{
 	
 	public boolean attempt_search() {
 		double p = Math.random()*1;
-		searched = true;
 		if(p > false_neg_p) {
 			return target;
 		}
@@ -106,25 +104,7 @@ public class Cell implements Comparable<Cell>{
 
 	@Override
 	public int compareTo(Cell c) {
-		if(this.false_neg_p - c.getFalseNegP() == 0) {
-			if(this.searched && !c.searched) {
-				return 1;
-			}else if(!this.searched && c.searched ) {
-				return -1;
-			}
-		}else if(this.searched && !c.searched) {
-			return 1;
-		}else if(!this.searched  && c.searched) {
-			return -1;
-		}else if(this.searched && c.searched) {
-			double p = Math.random()*1;
-			if(p > 0.5) {
-				Random r = new Random();
-				int min = -1;
-				int max = 1;
-				return r.nextInt((max - min) + 1) + min;
-			}
-		}
+		
 		
 		return this.false_neg_p - c.getFalseNegP() > 0 ? 1 : -1 ;
 	}

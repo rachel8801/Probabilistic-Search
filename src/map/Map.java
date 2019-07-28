@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 public class Map{
 	JFrame frame;
 	static int target_x, target_y;
-	static int dim = 25;
+	static int dim = 3;
 	static JPanel grid[][]= new JPanel[dim][dim];
 	public static Cell grid_cell[][]= new Cell[dim][dim];
 	public int type;
@@ -56,7 +56,7 @@ public class Map{
 	//updating java window
 	public static void object_move(Map.Object type, Cell src, Cell dest) {
 		try {
-		    Thread.sleep(50);
+		    Thread.sleep(100);
 		} catch (InterruptedException e) {
 		    // recommended because catching InterruptedException clears interrupt flag
 		    Thread.currentThread().interrupt();

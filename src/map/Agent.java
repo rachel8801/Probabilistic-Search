@@ -1,8 +1,9 @@
 package map;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.text.DecimalFormat;
+
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
 
 public class Agent {
 	//init values will be p = 1/dim*dim, updated as agent traverses grid
@@ -18,11 +19,13 @@ public class Agent {
 		int dim = Map.dim;
 		belief = new double[dim][dim];
 		//assigning prior probabilities
-		for(double[] arr : belief) {
-			for(double c : arr) {
-				c = 1.0/(dim*dim);
+		for(int i = 0 ; i < dim ; i++) {
+			for(int j = 0 ; j < dim ; j++) {
+				belief[i][j] = 1.0/(dim*dim);
 			}
 		}
+		
+		
 		current_cell = Map.grid_cell[0][0];
 		Map.grid[0][0].setBackground(Color.MAGENTA);
 	}	
@@ -101,30 +104,38 @@ public class Agent {
 	}
 	
 	public void searchRule1() {
-		double max = 0;
-
-		for(int i = 0 ; i < Map.dim; i++)
-		{
-			for(int j = 0 ; j < Map.dim ; j++)
-			{
-				if(belief[i][j] > max)
-				{
-					current_cell.setxCoor(i);
-					current_cell.setyCoor(j);
-					max = belief[i][j];
-				}
-			}
-		}
+		
+		//init timeout counter to prevent infinite while loop
 		int counter = 0;
 		Cell[][] grid = Map.grid_cell;
-
+		
+		//if target is in current cell, end search, print diagnosis.
 		if(current_cell.attempt_search()) {
 			System.out.println("Found target in " + counter + " steps at " + current_cell.coordinateToString());
 			return;
 		}
 		
+		double max;
+		//cell to hold next move
+		Cell next_move = current_cell;
+		
+		//continuously search for cell until counter times up or until cell is found
 		while(!current_cell.attempt_search() && (counter != grid.length*grid.length*grid.length)){
-			move(Rule.RULE_1);
+			update_state();
+			
+			//search for the cell with highest belief probability
+			max = belief[0][0];
+			for(int i = 0 ; i < Map.dim; i++){
+				for(int j = 0 ; j < Map.dim ; j++){
+					if(belief[i][j] > max){
+						next_move = Map.grid_cell[i][j];
+						max = belief[i][j];
+					}
+				}
+			}
+			System.out.println("After updating the belief, next move = " + next_move.coordinateToString());
+			Map.object_move(Map.Object.AGENT, current_cell, next_move);
+			current_cell= next_move;
 			counter++;
 		}
 		
@@ -194,33 +205,51 @@ public class Agent {
 			}
 		}
 	}
+	
 	/*
 	 * This function is to update the belief state  system if we didn't fine the target in current cell
 	 */
 	public void update_state() {
 		
 		double falseNegP = current_cell.getFalseNegP();
-		double norm = 1-belief[current_cell.getxCoor()][current_cell.getxCoor()]+belief[current_cell.getxCoor()][current_cell.getxCoor()]*falseNegP;
-		
-		for(int i = 0 ; i < Map.dim ; i++)
-		{
-			for(int j = 0 ; j < Map.dim ; j++)
-
-			{
-				//belief = new double[Map.dim][Map.dim];
-				belief[i][j] = 1.0/Math.pow(Map.dim, 2);
-				
-				if(i == current_cell.getxCoor() && j == current_cell.getxCoor())
-				{
-					belief[i][j] = falseNegP * belief[current_cell.getxCoor()][current_cell.getxCoor()]/norm ;
-				}
-				else
-				{
-					belief[i][j] = belief[i][j]/norm;
-						
-				}							
-				
+		double norm = 1-(belief[current_cell.getyCoor()][current_cell.getxCoor()]+belief[current_cell.getyCoor()][current_cell.getxCoor()]*falseNegP);
+		String norm_err = "1 - " 
+				+ belief[current_cell.getyCoor()][current_cell.getxCoor()] 
+				+ " + ("+belief[current_cell.getyCoor()][current_cell.getxCoor()]+"x "
+				+ falseNegP+" ) ";
+		if(norm <= 0 || norm >= 1) {
+			System.out.println("norm error= " + norm);
+			System.out.println(norm_err);
+			System.exit(-1);
+			
+		}
+		//get the new belief state for current cell
+		double cc_belief = falseNegP * belief[current_cell.getyCoor()][current_cell.getxCoor()]/norm ;
+		String[][] error_check = new String[Map.dim][Map.dim];
+		for(int i = 0 ; i < Map.dim ; i++){
+			for(int j = 0 ; j < Map.dim ; j++){
+				error_check[i][j] = belief[i][j]+"/"+ norm;
+				belief[i][j] = belief[i][j]/norm;
+				 
 			}
+		}
+		
+		belief[current_cell.getyCoor()][current_cell.getxCoor()] = cc_belief;
+		
+		DecimalFormat df = new DecimalFormat("###.###");
+
+		for(int i = 0 ; i < Map.dim ; i++){
+			for(int j = 0 ; j < Map.dim ; j++){
+				System.out.print(df.format(belief[i][j])+ " ");
+				if(belief[i][j] >= 1) {
+					System.out.println("norm error= " + norm);
+					System.out.println("norm error = " + norm_err);
+					System.out.println("belief error" + error_check[i][j]);
+					
+					System.exit(-1);
+				}
+			}
+			System.out.println();
 		}
 		
 	}
