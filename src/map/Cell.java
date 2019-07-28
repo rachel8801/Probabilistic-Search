@@ -51,6 +51,14 @@ public class Cell implements Comparable<Cell>{
 		return false;
 	}
 	
+	public void setxCoor(int xCoor) {
+		this.xCoor = xCoor;
+	}
+
+	public void setyCoor(int yCoor) {
+		this.yCoor = yCoor;
+	}
+
 	public int getxCoor() {
 		return xCoor;
 	}
