@@ -2,6 +2,7 @@ package map;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
 
@@ -9,8 +10,6 @@ public class Agent {
 	//init values will be p = 1/dim*dim, updated as agent traverses grid
 	private double[][] belief;
 	private Cell current_cell;
-	private Cell previous_cell;
-	private double updated_prob[][] = new double[Map.dim][Map.dim];
 	private enum Rule{
 		RULE_1, RULE_2
 	}
@@ -29,9 +28,9 @@ public class Agent {
 		current_cell = Map.grid_cell[0][0];
 		Map.grid[0][0].setBackground(Color.MAGENTA);
 	}	
-	
+	/*
 	public void move(Rule type) {
-/*		//get a list of random possible moves
+		//get a list of random possible moves
 		//init array to store random possible moves
 		ArrayList<Cell> possible_moves= new ArrayList<>();
 				
@@ -81,28 +80,15 @@ public class Agent {
 			previous_cell = current_cell;
 			current_cell = possible_moves.get(0);
 		}else {
-			//use belief system here
-			//sum used to calculate normalization constant for belief state
-			double sum=0;
-			for(double[] arr : belief) {
-			for(double c : arr) {
-				if(c == current_cell){
-					c=current_cell.type*c
-				} //else belief is only effected by normalization constant
-				sum=sum+c;
-			}
-		}
-			double norm=1/sum; //calculate normalization constant
-			for(double[] arr : belief) {
-			for(double c : arr) {
-				c=c*(1/norm) //normalize all belief states
+
+
 					
 			}
 		}
 		}
-	*/	
+		
 	}
-	
+	*/
 	public void searchRule1() {
 		
 		//init timeout counter to prevent infinite while loop
@@ -123,7 +109,8 @@ public class Agent {
 		while(!current_cell.attempt_search() && (counter != grid.length*grid.length*grid.length)){
 			update_state();
 			
-			//search for the cell with highest belief probability
+			// rule 1 
+			//search for the cell with highest belief probability for next to move
 			max = belief[0][0];
 			for(int i = 0 ; i < Map.dim; i++){
 				for(int j = 0 ; j < Map.dim ; j++){
@@ -147,12 +134,19 @@ public class Agent {
 	}
 	
 	public Cell rule1_q4(int x, int y) {
+		
+		// we need create a rule such that begin at (0,0), we randomly choose a check point, we calculate the manhattan distance from every cell to this point,
+		// and norm the average utility: P(target in cell )* P(target found in cell | target is in cell) / manhattan dist
+		//  and choose the maximum utility cell to move.
+		// Note; I Haven't finish this function yet, you can continue
+		// we apply this rule to rule 2 as well, and separately run it compared to original rule1 and 2
 		Cell[][] grid = Map.grid_cell;
+		//check[0] = x;
 	   
 		for(int i = 0; i< Map.dim; i++) {
 			for(int j = 0; j < Map.dim; j++) {
-				double updated_prob = belief[i][j];
-				belief[x][y] = updated_prob/(manhattan(i,j,x,y) +1);
+				 
+				belief[x][y] = belief[i][j]/(manhattan(i,j,x,y) +1);
 			}
 			double max =0;
 			if(belief[x][y] > max)
@@ -171,39 +165,68 @@ public class Agent {
 	}
 	
 	public void searchRule2() {
-		double max =0;
+		int counter = 0;
+		Cell[][] grid = Map.grid_cell;
 		
-		for (int i = 0; i < Map.dim; i ++) {
-			for(int j = 0; j < Map.dim; j++) {
-				
-				if(current_cell.type == 0) {
-					updated_prob[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
-				}
-				else if(current_cell.type == 1) {
-					updated_prob[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
-				}
-				else if(current_cell.type == 2) {
-					updated_prob[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
-				}
-				else if(current_cell.type == 3) {
-					updated_prob[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
-				}
-				
-			}
+		//if target is in current cell, end search, print diagnosis.
+		if(current_cell.attempt_search()) {
+			System.out.println("Found target in " + counter + " steps at " + current_cell.coordinateToString());
+			return;
 		}
-		for(int i = 0 ; i < Map.dim ; i++)
-		{
-			for(int j = 0 ; j < Map.dim ; j++)
-			{
-				if(updated_prob[i][j] > max)
-				{
-					max = updated_prob[i][j];
-					current_cell.setxCoor(i);
-					current_cell.setyCoor(j);
+		/*
+		 * Rule 2, we need update-states and then implement rule 2. Rule 2 scales the probabilities calculate in Rule 1: 
+		 * we multiply each cell's believe prob with P(target found in cell | targe in cell)
+		 * then we choose the maximum cell to move
+		 * */
+		double max = 0;
+		//cell to hold next move
+		Cell next_move = current_cell;
+		
+		//continuously search for cell until counter times up or until cell is found
+		while(!current_cell.attempt_search() && (counter != grid.length*grid.length*grid.length)){
+			update_state();
+			// Rule 2
+			for (int i = 0; i < Map.dim; i ++) {
+				for(int j = 0; j < Map.dim; j++) {
+					belief[i][j]= 1.0/Map.dim*Map.dim;
+					if(current_cell.type == 0) {
+						belief[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
+					}
+					else if(current_cell.type == 1) {
+						belief[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
+					}
+					else if(current_cell.type == 2) {
+						belief[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
+					}
+					else if(current_cell.type == 3) {
+						belief[i][j] = belief[i][j] * (1-current_cell.getFalseNegP());
+					}
 					
 				}
 			}
+			for(int i = 0 ; i < Map.dim ; i++)
+			{
+				for(int j = 0 ; j < Map.dim ; j++)
+				{
+					if(belief[i][j] > max)
+					{
+						next_move = Map.grid_cell[i][j];
+						max = belief[i][j];
+					}
+				}
+			}
+			System.out.println("After updating the belief, next move = " + next_move.coordinateToString());
+			Map.object_move(Map.Object.AGENT, current_cell, next_move);
+			current_cell= next_move;
+			counter++;
 		}
+		
+		if(counter == grid.length*grid.length*grid.length) {
+			System.out.println("Counter timed out.");
+		}else {
+			System.out.println("Found target in " + counter + " steps at " + current_cell.coordinateToString());
+		}
+		
 	}
 	
 	/*
@@ -213,45 +236,24 @@ public class Agent {
 		
 		double falseNegP = current_cell.getFalseNegP();
 		double norm = 1-(belief[current_cell.getyCoor()][current_cell.getxCoor()]+belief[current_cell.getyCoor()][current_cell.getxCoor()]*falseNegP);
-		String norm_err = "1 - " 
-				+ belief[current_cell.getyCoor()][current_cell.getxCoor()] 
-				+ " + ("+belief[current_cell.getyCoor()][current_cell.getxCoor()]+"x "
-				+ falseNegP+" ) ";
-		if(norm <= 0 || norm >= 1) {
-			System.out.println("norm error= " + norm);
-			System.out.println(norm_err);
-			System.exit(-1);
-			
-		}
-		//get the new belief state for current cell
-		double cc_belief = falseNegP * belief[current_cell.getyCoor()][current_cell.getxCoor()]/norm ;
-		String[][] error_check = new String[Map.dim][Map.dim];
-		for(int i = 0 ; i < Map.dim ; i++){
-			for(int j = 0 ; j < Map.dim ; j++){
-				error_check[i][j] = belief[i][j]+"/"+ norm;
-				belief[i][j] = belief[i][j]/norm;
-				 
-			}
-		}
-		
-		belief[current_cell.getyCoor()][current_cell.getxCoor()] = cc_belief;
-		
-		DecimalFormat df = new DecimalFormat("###.###");
 
 		for(int i = 0 ; i < Map.dim ; i++){
 			for(int j = 0 ; j < Map.dim ; j++){
-				System.out.print(df.format(belief[i][j])+ " ");
-				if(belief[i][j] >= 1) {
-					System.out.println("norm error= " + norm);
-					System.out.println("norm error = " + norm_err);
-					System.out.println("belief error" + error_check[i][j]);
-					
-					System.exit(-1);
+				if(i ==current_cell.getyCoor() && j == current_cell.getxCoor()){
+				//get the new belief state for current cell
+				//double cc_belief = falseNegP * belief[current_cell.getyCoor()][current_cell.getxCoor()]/norm ;
+				belief[i][j] = falseNegP * belief[current_cell.getyCoor()][current_cell.getxCoor()]/norm ;
+				//belief[current_cell.getyCoor()][current_cell.getxCoor()] = cc_belief;
+				}
+				else {
+				// get the new belief state for rest cell
+				belief[i][j] = belief[i][j]/norm;
+				 
 				}
 			}
-			System.out.println();
 		}
 		
+
 	}
 		
 	

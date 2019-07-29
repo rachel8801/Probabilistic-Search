@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 public class Map{
 	JFrame frame;
 	static int target_x, target_y;
-	static int dim = 3;
+	static int dim = 10;
 	static JPanel grid[][]= new JPanel[dim][dim];
 	public static Cell grid_cell[][]= new Cell[dim][dim];
 	public int type;
