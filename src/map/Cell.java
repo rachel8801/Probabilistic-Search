@@ -1,12 +1,11 @@
 package map;
 
-import java.util.Random;
-
 public class Cell implements Comparable<Cell>{
 	private int xCoor, yCoor;
 	public int type;
 	private double false_neg_p;
 	private boolean target;
+	public int density;
 	
 	
 	public Cell(int x, int y, int type, boolean target) {
@@ -14,6 +13,7 @@ public class Cell implements Comparable<Cell>{
 		this.yCoor = y;
 		this.target = target;
 		this.type = type;
+		density = 0;
 		switch(type) {
 			//flat
 			case 0:
@@ -45,6 +45,10 @@ public class Cell implements Comparable<Cell>{
 		double p = Math.random()*1;
 		if(p > false_neg_p) {
 			return target;
+		}
+		density ++;
+		if(density == 250) {
+			density = density/2;
 		}
 		return false;
 	}

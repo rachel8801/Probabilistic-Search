@@ -9,87 +9,91 @@ import javax.swing.JPanel;
 
 public class Map{
 	JFrame frame;
-	static int target_x, target_y;
-	static int dim = 10;
-	static JPanel grid[][]= new JPanel[dim][dim];
-	public static Cell grid_cell[][]= new Cell[dim][dim];
+	private boolean frame_show;
+	public int target_x, target_y;
+	public int dim;
+	public JPanel grid[][];
+	public Cell grid_cell[][];
 	public int type;
-	public static Target target;
-	public static Agent agent;
+	public Target target;
 	
 	public enum Object{
 		TARGET, AGENT
 	}
 	
-	public Map() {
+	public Map(boolean window, int dim) {
+		this.dim = dim;
+		grid= new JPanel[dim][dim];
+		grid_cell= new Cell[dim][dim];
 		frame = new JFrame("Map");
 		frame.setSize(700, 700);
 		frame.setLayout(new GridLayout(dim, dim));
 		
-		   for (int i = 0; i < dim; i++) {
-		        for (int j = 0; j < dim; j++) {
-
-		            grid[i][j] = new JPanel();
-		            int type = this.assignType(i, j);
-		            //create new cell and puts it into the grid containing the cells
-		            Cell c = new Cell(j, i, type, false);
-		            grid_cell[i][j] = c;
-		            
-		            frame.add(grid[i][j]);  
-		        }
-		   }
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				grid[i][j] = new JPanel();
+		        int type = this.assignType(i, j);
+		        //create new cell and puts it into the grid containing the cells
+		        Cell c = new Cell(j, i, type, false);
+		        grid_cell[i][j] = c;
+	            frame.add(grid[i][j]);  
+	         }
+		}
 		
-		        	Random random = new Random();
+		Random random = new Random();
 		        
-			 		target_x = random.nextInt(dim-1);
-			   		target_y = random.nextInt(dim-1);
-			   		target = new Target(target_x, target_y);
-			   		agent = new Agent();
-			   		grid[target_y][target_x].setBackground(Color.RED);
-  
+		target_x = random.nextInt(dim-1);
+		target_y = random.nextInt(dim-1);
+		target = new Target(target_x, target_y, this);
+		grid[target_y][target_x].setBackground(Color.RED);
+		target.getLocation();
     
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	    frame.setVisible(true);
+	    frame_show = window;
+	    if(window) {
+	    	frame.setVisible(true);
+	    }
 
 	}  
 	
 	//updating java window
-	public static void object_move(Map.Object type, Cell src, Cell dest) {
-		try {
-		    Thread.sleep(100);
-		} catch (InterruptedException e) {
-		    // recommended because catching InterruptedException clears interrupt flag
-		    Thread.currentThread().interrupt();
-		    // you probably want to quit if the thread is interrupted
-		    return;
+	public void object_move(Map.Object type, Cell src, Cell dest) {
+		if(frame_show) {
+			try {
+			    Thread.sleep(100);
+			} catch (InterruptedException e) {
+			    // recommended because catching InterruptedException clears interrupt flag
+			    Thread.currentThread().interrupt();
+			    // you probably want to quit if the thread is interrupted
+			    return;
+			}
+			
+			int r = src.type;
+			if(!target.getCurrentCell().equals(src) && type == Map.Object.AGENT) {
+				
+				//flat
+		        if (r == 0) {
+		        	 grid[src.getyCoor()][src.getxCoor()].setBackground(Color.WHITE);
+		        }
+		        //forest
+		        else if(r ==1){
+		        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.GREEN);
+		        }
+		        //hill
+		        else if(r ==2){
+		        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.YELLOW);
+		        }
+		        //cave
+		        else if(r ==3){
+		        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.BLACK);
+		        }
+			}
+			
+			if(type == Map.Object.AGENT && target.getCurrentCell().equals(src) ) {
+				grid[src.getyCoor()][src.getxCoor()].setBackground(Color.red);
+			}
+	        grid[dest.getyCoor()][dest.getxCoor()].setBackground(type == Map.Object.AGENT? Color.magenta: Color.red);
 		}
-		
-		int r = src.type;
-		if((!target.getCurrentCell().equals(src) && type == Map.Object.AGENT) 
-				||(!agent.getCurrentCell().equals(src) && type == Map.Object.TARGET)) {
-			//flat
-	        if (r == 0) {
-	        	 grid[src.getyCoor()][src.getxCoor()].setBackground(Color.WHITE);
-	        }
-	        //forest
-	        else if(r ==1){
-	        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.GREEN);
-	        }
-	        //hill
-	        else if(r ==2){
-	        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.YELLOW);
-	        }
-	        //cave
-	        else if(r ==3){
-	        	grid[src.getyCoor()][src.getxCoor()].setBackground(Color.BLACK);
-	        }
-		}else if(type == Map.Object.AGENT && target.getCurrentCell().equals(src) ) {
-			grid[src.getyCoor()][src.getxCoor()].setBackground(Color.red);
-		}else if(type == Map.Object.TARGET && agent.getCurrentCell().equals(src)) {
-			grid[src.getyCoor()][src.getxCoor()].setBackground(Color.magenta);
-		}
-        
-        grid[dest.getyCoor()][dest.getxCoor()].setBackground(type == Map.Object.AGENT? Color.magenta: Color.red);
 		
 	}
 	
@@ -118,17 +122,12 @@ public class Map{
            	return 3;
         }
 	}
-
-	public static void main(String[] args) {
-		new Map();
-		Agent agent = new Agent();
-		agent.searchRule1();
-		
-		/*
-		//tests for moving target
-		for(int i = 0; i < 50 ; i++) {
-			target.move();
-		}*/
-	}
 	
+	public void resetMap() {
+		if(frame_show) {
+			grid[0][0].setBackground(Color.magenta);
+			grid[target.getCurrentCell().getyCoor()][target.getCurrentCell().getxCoor()].setBackground(Color.red);
+		
+		}
+	}
 }
