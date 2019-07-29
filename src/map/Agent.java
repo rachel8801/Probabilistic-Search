@@ -24,8 +24,8 @@ public class Agent {
 		current_cell = map.grid_cell[0][0];
 		map.grid[0][0].setBackground(Color.MAGENTA);
 	}	
-	/*
-	public void move(Rule type) {
+	
+	public Cell move() {
 		//get a list of random possible moves
 		//init array to store random possible moves
 		ArrayList<Cell> possible_moves= new ArrayList<>();
@@ -40,52 +40,43 @@ public class Agent {
 		new_x = x;
 		new_y = y - 1;
 				
-		if(new_y < Map.grid_cell.length && new_y >= 0) {
-			possible_moves.add(Map.grid_cell[new_y][new_x]);		
+		if(new_y < map.grid_cell.length && new_y >= 0) {
+			possible_moves.add(map.grid_cell[new_y][new_x]);		
 		}
 				
 		//left
 		new_x = x + 1;
 		new_y = y;
-		if(new_x < Map.grid_cell.length && new_x >= 0) {
-			possible_moves.add(Map.grid_cell[new_y][new_x]);
+		if(new_x < map.grid_cell.length && new_x >= 0) {
+			possible_moves.add(map.grid_cell[new_y][new_x]);
 		}
 				
 		//down
 		new_x = x;
 		new_y = y + 1;
-		if(new_y < Map.grid_cell.length && new_y >= 0) {
-			possible_moves.add(Map.grid_cell[new_y][new_x]);		
+		if(new_y < map.grid_cell.length && new_y >= 0) {
+			possible_moves.add(map.grid_cell[new_y][new_x]);		
 		}
 				
 		//right
 		new_x = x - 1;
 		new_y = y;
-		if(new_x < Map.grid_cell.length && new_x >= 0) {
-			possible_moves.add(Map.grid_cell[new_y][new_x]);
-		}
-				
-		if(type == Rule.RULE_1) {
-			Collections.sort(possible_moves);
-			//if the previous cell is not null, attempt to remove it from the list of possible moves to prevent loops
-			if(previous_cell!= null) {
-				possible_moves.remove(previous_cell);
-			}
-			//move on jpanel
-			Map.object_move(Map.Object.AGENT, current_cell, possible_moves.get(0));
-			previous_cell = current_cell;
-			current_cell = possible_moves.get(0);
-		}else {
-
-
-					
-			}
-		}
+		if(new_x < map.grid_cell.length && new_x >= 0) {
+			possible_moves.add(map.grid_cell[new_y][new_x]);
 		}
 		
+		//get best move
+		Cell next_move = possible_moves.get(0);
+		double max = belief[next_move.getyCoor()][next_move.getxCoor()];
+		for(Cell c : possible_moves) {
+			if(belief[c.getyCoor()][c.getxCoor()] > max) {
+				next_move = c;
+			}
+		}
+		return next_move;
 	}
-	*/
-	public void search(Rule rule) {
+	
+	public void search(Rule rule, Boolean Q4) {
 		System.out.println(name + " searching with " + rule);
 	
 		//reset belief table and map
@@ -112,7 +103,6 @@ public class Agent {
 			
 		//continuously search for cell until counter times up or until cell is found
 		while(!current_cell.attempt_search() && (counter != grid.length*grid.length*grid.length)){
-			update_state(rule);
 					
 			//search for a list of cells with highest belief probability
 			//randomly choose from list
@@ -134,6 +124,29 @@ public class Agent {
 					
 			int random_index = (int) (Math.random()*(possible_moves.size()-1));
 			next_move = possible_moves.get(random_index);
+			
+			update_state(rule, Q4, next_move);
+			
+			if(Q4){
+				while(!current_cell.equals(next_move)) {
+					previous_cell = current_cell;
+					current_cell = move();
+					map.object_move(Map.Object.AGENT, previous_cell, current_cell);
+					counter++;
+					if(current_cell.attempt_search()) {
+						System.out.println(name + " found target in " + counter + " steps at " + current_cell.coordinateToString());
+						return;
+					}else {
+						if(counter == grid.length*grid.length*grid.length) {
+							System.out.println(name + " Counter timed out.");
+							return;
+						}
+						update_state(rule, Q4, next_move);
+					}
+				}
+				System.out.println("Reached cell!");
+				
+			}
 					
 			map.object_move(Map.Object.AGENT, current_cell, next_move);
 			previous_cell = current_cell;
@@ -148,32 +161,6 @@ public class Agent {
 		}
 	}
 	
-	public Cell rule1_q4(int x, int y) {
-		
-		// we need create a rule such that begin at (0,0), we randomly choose a check point, we calculate the manhattan distance from every cell to this point,
-		// and norm the average utility: P(target in cell )* P(target found in cell | target is in cell) / manhattan dist
-		//  and choose the maximum utility cell to move.
-		// Note; I Haven't finish this function yet, you can continue
-		// we apply this rule to rule 2 as well, and separately run it compared to original rule1 and 2
-		Cell[][] grid = map.grid_cell;
-		//check[0] = x;
-	   
-		for(int i = 0; i< map.dim; i++) {
-			for(int j = 0; j < map.dim; j++) {
-				 
-				belief[x][y] = belief[i][j]/(manhattan(i,j,x,y) +1);
-			}
-			double max =0;
-			if(belief[x][y] > max)
-			{
-				current_cell.setxCoor(x);
-				current_cell.setyCoor(y);
-				max = belief[x][y];
-			}
-		}
-		return grid[x][y];
-
-	}
 	
 	public int manhattan(int a, int b, int x, int y) {
 		return Math.abs(a-x) + Math.abs(b-y);
@@ -183,7 +170,7 @@ public class Agent {
 	/*
 	 * This function is to update the belief state  system if we didn't fine the target in current cell
 	 */
-	private void update_state(Rule rule) {
+	private void update_state(Rule rule, Boolean q4, Cell q4_cell) {
 		//get false negative and norm
 		double falseNegP = current_cell.getFalseNegP();
 		double norm = 1-belief[current_cell.getyCoor()][current_cell.getxCoor()]+belief[current_cell.getyCoor()][current_cell.getxCoor()]*falseNegP;
@@ -205,8 +192,22 @@ public class Agent {
 				if(rule == Rule.RULE_2) {
 					belief[i][j] *= (1 - map.grid_cell[i][j].getFalseNegP());
 				}
+				
+				//if using for q4 divide by manhattan distance
+				if(q4) {
+					belief[i][j] /= (manhattan(i,j,q4_cell.getxCoor(),q4_cell.getyCoor()) + 1);
+				}
 			}
 		}	
+		/*
+		for(int i = 0 ; i < map.dim ; i++){
+			System.out.println("row " + i);
+			for(int j = 0 ; j < map.dim ; j++){
+				System.out.println(belief[i][j]);
+			}
+			System.out.println("*");
+		}
+		System.out.println("***********");*/
 	}
 		
 	
