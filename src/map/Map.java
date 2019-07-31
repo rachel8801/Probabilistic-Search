@@ -46,7 +46,7 @@ public class Map{
 		target_y = random.nextInt(dim-1);
 		target = new Target(target_x, target_y, this);
 		grid[target_y][target_x].setBackground(Color.RED);
-		target.getLocation();
+		//target.getLocation();
     
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    frame_show = window;
@@ -60,7 +60,7 @@ public class Map{
 	public void object_move(Map.Object type, Cell src, Cell dest) {
 		if(frame_show) {
 			try {
-			    Thread.sleep(100);
+			    Thread.sleep(0);
 			} catch (InterruptedException e) {
 			    // recommended because catching InterruptedException clears interrupt flag
 			    Thread.currentThread().interrupt();

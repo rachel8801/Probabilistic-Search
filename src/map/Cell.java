@@ -1,5 +1,7 @@
 package map;
 
+import java.util.ArrayList;
+
 public class Cell implements Comparable<Cell>{
 	private int xCoor, yCoor;
 	public int type;
@@ -85,6 +87,48 @@ public class Cell implements Comparable<Cell>{
 		
 	}
 	
+	public ArrayList<Cell> getNeighbours(Map map){
+		//get a list of random possible moves
+				//init array to store random possible moves
+				ArrayList<Cell> possible_moves= new ArrayList<>();
+						
+				//init vars to store possible x and y
+				int x, y;
+				x = this.getxCoor();
+				y = this.getyCoor();
+				
+				int new_x, new_y;
+				//up
+				new_x = x;
+				new_y = y - 1;
+						
+				if(new_y < map.grid_cell.length && new_y >= 0) {
+					possible_moves.add(map.grid_cell[new_y][new_x]);		
+				}
+						
+				//left
+				new_x = x + 1;
+				new_y = y;
+				if(new_x < map.grid_cell.length && new_x >= 0) {
+					possible_moves.add(map.grid_cell[new_y][new_x]);
+				}
+						
+				//down
+				new_x = x;
+				new_y = y + 1;
+				if(new_y < map.grid_cell.length && new_y >= 0) {
+					possible_moves.add(map.grid_cell[new_y][new_x]);		
+				}
+						
+				//right
+				new_x = x - 1;
+				new_y = y;
+				if(new_x < map.grid_cell.length && new_x >= 0) {
+					possible_moves.add(map.grid_cell[new_y][new_x]);
+				}
+				
+				return possible_moves;
+	}
 	@Override
 	public String toString() {
 		if(target){
@@ -93,7 +137,7 @@ public class Cell implements Comparable<Cell>{
 		return type + " ";
 	}
 	
-
+	
 	
 	@Override
 	public boolean equals(Object o) {
