@@ -149,28 +149,14 @@ public class Agent {
 			ArrayList<Cell> possible_moves = new ArrayList<Cell>();
 			for (int i = 0; i < map.dim; i++) {
 				for (int j = 0; j < map.dim; j++) {
-					if (target_report != null) {
-						if (target_report.contains(map.grid_cell[i][j].type)) {
-							if (belief[i][j] > max) {
-								possible_moves.clear();
-								next_move = map.grid_cell[i][j];
-								max = belief[i][j];
-								possible_moves.add(next_move);
-							} else if (belief[i][j] == max) {
-								next_move = map.grid_cell[i][j];
-								possible_moves.add(next_move);
-							}
-						}
-					} else {
-						if (belief[i][j] > max) {
-							possible_moves.clear();
-							next_move = map.grid_cell[i][j];
-							max = belief[i][j];
-							possible_moves.add(next_move);
-						} else if (belief[i][j] == max) {
-							next_move = map.grid_cell[i][j];
-							possible_moves.add(next_move);
-						}
+					if (belief[i][j] > max) {
+						possible_moves.clear();
+						next_move = map.grid_cell[i][j];
+						max = belief[i][j];
+						possible_moves.add(next_move);
+					} else if (belief[i][j] == max) {
+						next_move = map.grid_cell[i][j];
+						possible_moves.add(next_move);
 					}
 				}
 			}
@@ -255,22 +241,9 @@ public class Agent {
 
 		// get target_move numerator and denominator
 		double numerator = 0;
-
-		if (target_move) {
-			for (int i = 0; i < 4; i++) {
-				if (target_report != null) {
-					if (target_report.contains(i)) {
-						// flat or cave
-						if (i == 0 || i == 3) {
-							numerator += (Math.pow(map.dim, 2) * 0.2);
-						} else {
-							// forest or hill
-							numerator += (Math.pow(map.dim, 2) * 0.3);
-						}
-					}
-				}
-			}
-		}
+		double denominator = 0;
+		double distributed_prob = 0;
+		
 
 		// update the belief states
 		for (int i = 0; i < map.dim; i++) {
@@ -289,32 +262,54 @@ public class Agent {
 				if (rule == Rule.RULE_2) {
 					belief[i][j] *= (1 - map.grid_cell[i][j].getFalseNegP());
 				}
-
-				// if using for target is moving
-				if (target_move) {
+			}
+		}
+		
+		if (target_move) {
+			for (int i = 0; i < map.dim; i++) {
+				for(int j = 0 ; j < map.dim; j++) {
+					if(target_report!= null) {
+						if(!target_report.contains(map.grid_cell[i][j].getType())) {
+							numerator += belief[i][j];
+						}else {
+							denominator++;
+						}
+					}
+				}
+			}
+			
+			distributed_prob = numerator/denominator;
+			
+		}
+		
+		if(target_move) {
+			for(int i = 0; i< map.dim; i++) {
+				for(int j = 0; j<map.dim; j++) {
 					if (target_report != null) {
 						if (target_report.contains(map.grid_cell[i][j].type)) {
-							if (belief[i][j] == 0) {
-								belief[i][j] = move_belief[i][j];
-							}
-							belief[i][j] *= numerator / 2500;
+							belief[i][j] += distributed_prob;
 						} else {
-							if (move_belief[i][j] != 0) {
-								move_belief[i][j] = belief[i][j];
-							}
 							belief[i][j] = 0;
 						}
 					}
 				}
 			}
 		}
-		/*
-		 * DecimalFormat df = new DecimalFormat("###.########"); for(int i = 0 ; i <
-		 * map.dim ; i ++) { for(int j = 0 ; j < map.dim ; j ++) {
-		 * System.out.print(df.format(belief[i][j]) + " "); } System.out.println(); }
-		 * System.out.println();
-		 */
 
+		
+		/*		
+		double total = 0;
+		 DecimalFormat df = new DecimalFormat("###.###"); 
+		 for(int i = 0 ; i < map.dim ; i ++) { 
+			 for(int j = 0 ; j < map.dim ; j ++) {
+				 //System.out.print(df.format(belief[i][j]) + " "); 
+				 total+=belief[i][j];
+			 } 
+			 //System.out.println(); 
+		 }
+		 System.out.println();
+		 System.out.println("consistency check: " + total);
+*/
 	}
 
 	public Cell getCurrentCell() {
